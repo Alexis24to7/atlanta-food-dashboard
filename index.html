@@ -6,136 +6,145 @@
     <title>FWA Dashboard</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --fwa-green: #2e7d32;
-            --fwa-dark: #1b5e20;
-            --light-bg: #f0f2f0;
+        :root { --fwa-green: #2e7d32; --fwa-dark: #1b5e20; --white: #ffffff; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; overflow: hidden; }
+
+        /* Layout Container */
+        #app-container { display: flex; height: 100vh; width: 100vw; }
+
+        /* Sidebar (Concept3D Style) */
+        #sidebar {
+            width: 350px; background: var(--white); z-index: 2000;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column;
         }
 
-        body { 
-            font-family: 'Inter', -apple-system, sans-serif; 
-            margin: 0; background-color: var(--light-bg); color: #333;
-        }
-
-        header {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 0 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            height: 70px; border-bottom: 1px solid #ddd;
-            position: sticky; top: 0; z-index: 1000;
-        }
-
-        .logo { font-size: 1.4rem; font-weight: 800; color: var(--fwa-green); cursor: pointer; text-decoration: none; }
-        .nav-tabs { display: flex; gap: 5px; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #eee; }
+        .logo { font-weight: 800; color: var(--fwa-green); font-size: 1.2rem; cursor: pointer; display: block; margin-bottom: 15px; }
         
+        /* Search Bar */
+        .search-container { position: relative; margin-bottom: 10px; }
+        #zip-search {
+            width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ddd;
+            box-sizing: border-box; font-size: 0.9rem;
+        }
+
+        /* Nav Buttons */
+        .nav-tabs { display: flex; gap: 5px; padding: 0 20px 15px; }
         .tab-btn {
-            background: none; border: none; padding: 10px 20px;
-            font-size: 0.9rem; font-weight: 600; color: #555; cursor: pointer;
-            border-radius: 8px; transition: 0.2s;
+            flex: 1; padding: 10px; border: none; background: #f0f2f0;
+            border-radius: 6px; cursor: pointer; font-weight: 600; color: #555;
         }
+        .tab-btn.active { background: var(--fwa-green); color: white; }
 
-        .tab-btn.active { background: var(--fwa-green); color: white; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3); }
+        /* Map Area */
+        #map-wrapper { flex-grow: 1; position: relative; background: #e5e3df; }
+        #map { height: 100%; width: 100%; }
 
-        .content-section { display: none; padding: 30px 5%; animation: fadeIn 0.3s; }
+        /* Live Location Button */
+        .locate-btn {
+            position: absolute; bottom: 30px; right: 20px; z-index: 1000;
+            background: white; border: none; width: 45px; height: 45px;
+            border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; transition: 0.2s;
+        }
+        .locate-btn:hover { transform: scale(1.1); }
+
+        /* Content Sections */
+        .side-content { padding: 20px; overflow-y: auto; flex-grow: 1; display: none; }
         .active-section { display: block; }
-
-        /* The 3D-ish Map Container */
-        #map-wrapper {
-            perspective: 1000px; /* Gives a sense of depth */
-            margin-top: 20px;
-        }
-
-        #map-container {
-            background: white; 
-            padding: 10px; 
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15); /* Deep shadow for 3D pop */
-            transform: rotateX(2deg); /* Subtle tilt */
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        #map { 
-            height: 70vh; /* Fixed height so it loads! */
-            width: 100%; 
-            border-radius: 15px; 
-        }
-
-        .card {
-            background: white; padding: 25px; border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<header>
-    <a class="logo" onclick="showSection('home')">🌿 FWA Dashboard</a>
-    <div class="nav-tabs">
-        <button class="tab-btn" id="btn-map" onclick="showSection('map-tab')">Map</button>
-        <button class="tab-btn" id="btn-guide" onclick="showSection('guide')">Guide</button>
-    </div>
-</header>
+<div id="app-container">
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo" onclick="location.reload()">🌿 FWA ATLAS</span>
+            <div class="search-container">
+                <input type="text" id="zip-search" placeholder="Enter Zip Code (e.g. 30318)" onkeypress="handleSearch(event)">
+            </div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="btn-map" onclick="showSection('map-tab')">Map</button>
+            <button class="tab-btn" id="btn-guide" onclick="showSection('guide')">Guide</button>
+        </div>
 
-<div id="home" class="content-section active-section">
-    <div style="text-align: center; padding: 40px 0;">
-        <h1 style="font-size: 3rem; color: var(--fwa-dark); margin-bottom: 10px;">Locally Grown.</h1>
-        <p style="font-size: 1.2rem; color: #666;">Empowering Atlanta's urban growers since 2015.</p>
-    </div>
-</div>
+        <div id="map-tab" class="side-content active-section">
+            <h3>Resources Near You</h3>
+            <p style="color: #666; font-size: 0.85rem;">Type your zip code above to find FWA hubs.</p>
+            <div id="location-details"></div>
+        </div>
 
-<div id="map-tab" class="content-section">
-    <div id="map-wrapper">
-        <div id="map-container">
-            <div id="map"></div>
+        <div id="guide" class="side-content">
+            <h3>FWA Resource Guide</h3>
+            <p><b>How to Rent:</b> Visit the Atlanta ToolBank with your FWA membership.</p>
+            <p><b>Compost:</b> Delivery available for registered gardens.</p>
         </div>
     </div>
-</div>
 
-<div id="guide" class="content-section">
-    <h1>FWA Resource Guide</h1>
-    <div class="card">
-        <h3>🛠 Tool Lending Hub</h3>
-        <p>Located at the Atlanta ToolBank. Complete your BCS training to start renting.</p>
+    <div id="map-wrapper">
+        <div id="map"></div>
+        <button class="locate-btn" onclick="findMe()" title="Find my location">🎯</button>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    function showSection(sectionId) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
-        document.getElementById(sectionId).classList.add('active-section');
-        
-        if(sectionId !== 'home') {
-            const btnId = sectionId === 'map-tab' ? 'btn-map' : 'btn-guide';
-            document.getElementById(btnId).classList.add('active');
-        }
+    // Initialize Map
+    var map = L.map('map', { zoomControl: false }).setView([33.7490, -84.3880], 12);
+    L.control.zoom({ position: 'topright' }).addTo(map);
 
-        if(sectionId === 'map-tab') {
-            // This line fixes the "gray map" or "non-loading map" issue
-            setTimeout(() => { map.invalidateSize(); }, 300);
-        }
-    }
-
-    // Initialize Map with a cleaner, high-detail "3D-friendly" tile
-    var map = L.map('map', {
-        scrollWheelZoom: false // Prevents accidental scrolling while browsing the site
-    }).setView([33.7490, -84.3880], 12);
-
+    // High-Detail 3D-ish Tiles
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    // FWA Points
-    L.marker([33.7846, -84.4225]).addTo(map).bindPopup('<b>FWA Headquarters</b>');
-    L.marker([33.7431, -84.3725]).addTo(map).bindPopup('<b>Atlanta ToolHub</b>');
+    // FWA Data Points
+    var locations = [
+        { name: "FWA HQ", lat: 33.7846, lng: -84.4225, info: "Headquarters & Office" },
+        { name: "Tool Lending Hub", lat: 33.7431, lng: -84.3725, info: "ToolBank - Rent tractors here!" }
+    ];
+
+    locations.forEach(loc => {
+        L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.info}`);
+    });
+
+    // 1. Live Location Function
+    function findMe() {
+        map.locate({setView: true, maxZoom: 16});
+    }
+
+    map.on('locationfound', function(e) {
+        L.circle(e.latlng, e.accuracy).addTo(map);
+        L.marker(e.latlng).addTo(map).bindPopup("You are here").openPopup();
+    });
+
+    // 2. Zip Code Search (Simple Version)
+    function handleSearch(e) {
+        if (e.key === 'Enter') {
+            var zip = document.getElementById('zip-search').value;
+            // For now, we center on Atlanta's general area for specific zips
+            // In a real app, we'd use a Geocoder API here.
+            alert("Searching for resources in " + zip + "...");
+            map.flyTo([33.7490, -84.3880], 13);
+        }
+    }
+
+    // 3. Sidebar Tab Switching
+    function showSection(sectionId) {
+        document.querySelectorAll('.side-content').forEach(s => s.classList.remove('active-section'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(sectionId).classList.add('active-section');
+        const btnId = sectionId === 'map-tab' ? 'btn-map' : 'btn-guide';
+        document.getElementById(btnId).classList.add('active');
+    }
 </script>
 
 </body>
