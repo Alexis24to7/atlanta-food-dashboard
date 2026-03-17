@@ -3,93 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FWA Dashboard | Food Well Alliance</title>
+    <title>FWA Dashboard</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; }
+        :root {
+            --fwa-green: #2e7d32;
+            --fwa-dark: #1b5e20;
+            --light-bg: #f8f9fa;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; padding: 0; background-color: var(--light-bg); color: #333;
+        }
+
+        /* Header Style */
+        header {
+            background: white;
+            padding: 0 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--fwa-green);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs { display: flex; gap: 10px; }
         
-        /* Navigation Bar */
-        nav { background-color: #2e7d32; color: white; padding: 1rem; display: flex; justify-content: center; gap: 20px; position: sticky; top: 0; z-index: 1000; }
-        nav button { background: none; border: 2px solid white; color: white; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        nav button:hover { background-color: white; color: #2e7d32; }
+        .tab-btn {
+            background: none; border: none;
+            padding: 10px 20px;
+            font-size: 1rem; font-weight: 600;
+            color: #666; cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+        }
 
-        /* Section Visibility */
-        .content-section { display: none; padding: 40px; max-width: 900px; margin: auto; }
-        .active { display: block; }
+        .tab-btn:hover { color: var(--fwa-green); }
+        .tab-btn.active { 
+            color: var(--fwa-green); 
+            border-bottom: 3px solid var(--fwa-green); 
+        }
 
-        /* Map Styling */
-        #map { height: 600px; width: 100%; border-radius: 10px; border: 2px solid #2e7d32; margin-top: 20px; }
+        /* Content Sections */
+        .content-section { display: none; padding: 40px 5%; animation: fadeIn 0.4s; }
+        .content-section.active-section { display: block; }
 
-        h1 { color: #2e7d32; }
-        .card { background: white; padding: 20px; border-radius: 10px; shadow: 0 4px 8px rgba(0,0,0,0.1); line-height: 1.6; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Map Container */
+        #map-container {
+            background: white; padding: 15px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        #map { height: 65vh; width: 100%; border-radius: 10px; }
+
+        /* Cards for Guide */
+        .card {
+            background: white; padding: 25px; border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--fwa-dark); }
+        .hero { text-align: center; padding: 60px 0; }
     </style>
 </head>
 <body>
 
-<nav>
-    <button onclick="showSection('home')">Home</button>
-    <button onclick="showSection('map-tab')">Interactive Map</button>
-    <button onclick="showSection('guide')">User Guide</button>
-</nav>
+<header>
+    <div class="logo" onclick="showSection('home')">🌿 FWA Dashboard</div>
+    <div class="nav-tabs">
+        <button class="tab-btn" id="btn-map" onclick="showSection('map-tab')">Map</button>
+        <button class="tab-btn" id="btn-guide" onclick="showSection('guide')">Guide</button>
+    </div>
+</header>
 
-<div id="home" class="content-section active">
-    <h1>Welcome to the FWA Dashboard</h1>
-    <div class="card">
-        <p><strong>Food Well Alliance (FWA)</strong> is a collaborative network that supports over 300 community gardens, urban farms, and orchards across metro Atlanta.</p>
-        <p>This project was developed to help Atlanta citizens find resources to build thriving, equitable communities through local food. Our mission is to connect you with the tools, land, and people needed to grow food where you live.</p>
+<div id="home" class="content-section active-section">
+    <div class="hero">
+        <h1>Locally Grown. Community Connected.</h1>
+        <p style="font-size: 1.2rem; color: #666; max-width: 600px; margin: auto;">
+            Empowering Atlanta's urban growers with the tools, land, and resources needed to build an equitable local food system.
+        </p>
     </div>
 </div>
 
 <div id="map-tab" class="content-section">
-    <h1>Find a Garden or Tool Hub</h1>
-    <p>Use the map below to find FWA-supported resources near your zip code.</p>
-    <div id="map"></div>
+    <div id="map-container">
+        <h2 style="margin-top:0;">Interactive Resource Map</h2>
+        <div id="map"></div>
+    </div>
 </div>
 
 <div id="guide" class="content-section">
-    <h1>The FWA Way: Resource Guide</h1>
+    <h1>FWA Resource Guide</h1>
     <div class="card">
-        <h3>How to Rent Tools</h3>
-        <p>FWA partners with the Atlanta ToolBank. To access the Urban Agriculture Tool Lending Program, you must first complete a <strong>BCS Tractor Training</strong> session.</p>
-        
-        <h3>Requesting Compost</h3>
-        <p>Registered community gardens can request compost deliveries and mechanical assistance directly through the FWA Resource Center.</p>
-        
-        <h3>Starting a Garden</h3>
-        <p>The "FWA Way" focuses on community collaboration. Don't just plant seeds—organize your neighbors!</p>
+        <h3>🛠 Urban Agriculture Tool Lending</h3>
+        <p>Access high-quality tools like BCS Tractors through our partnership with the Atlanta ToolBank.</p>
+    </div>
+    <div class="card">
+        <h3>🌱 Compost Support</h3>
+        <p>Request healthy soil for your community garden to ensure a productive harvest.</p>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // 1. Function to switch between tabs
     function showSection(sectionId) {
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.getElementById(sectionId).classList.add('active');
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
+        // Deactivate all buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         
-        // Fix for Leaflet: Refresh map size when tab is clicked
+        // Show target section
+        document.getElementById(sectionId).classList.add('active-section');
+        
+        // Add active class to button if it's not the logo click
+        if(sectionId !== 'home') {
+            const btnId = sectionId === 'map-tab' ? 'btn-map' : 'btn-guide';
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // Map refresh
         if(sectionId === 'map-tab') {
             setTimeout(() => { map.invalidateSize(); }, 200);
         }
     }
 
-    // 2. Initialize the Map
-    var map = L.map('map').setView([33.7490, -84.3880], 11); // Centered on Atlanta
-
-    // 3. Add the Map "Skin" (Tiles)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+    // Initialize Map
+    var map = L.map('map').setView([33.7490, -84.3880], 11);
+    L.tileLayer('https://{s}.tile.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    // 4. Example Marker (FWA Office area)
-    L.marker([33.7490, -84.3880]).addTo(map)
-        .bindPopup('Welcome to Atlanta!<br> Future FWA locations will appear here.')
-        .openPopup();
+    // Initial markers
+    L.marker([33.7846, -84.4225]).addTo(map).bindPopup('FWA Headquarters');
+    L.marker([33.7431, -84.3725]).addTo(map).bindPopup('Atlanta ToolBank');
 </script>
 
 </body>
