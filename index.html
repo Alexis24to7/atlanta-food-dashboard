@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FWA Dashboard | Food Well Alliance</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; }
+        
+        /* Navigation Bar */
+        nav { background-color: #2e7d32; color: white; padding: 1rem; display: flex; justify-content: center; gap: 20px; position: sticky; top: 0; z-index: 1000; }
+        nav button { background: none; border: 2px solid white; color: white; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        nav button:hover { background-color: white; color: #2e7d32; }
+
+        /* Section Visibility */
+        .content-section { display: none; padding: 40px; max-width: 900px; margin: auto; }
+        .active { display: block; }
+
+        /* Map Styling */
+        #map { height: 600px; width: 100%; border-radius: 10px; border: 2px solid #2e7d32; margin-top: 20px; }
+
+        h1 { color: #2e7d32; }
+        .card { background: white; padding: 20px; border-radius: 10px; shadow: 0 4px 8px rgba(0,0,0,0.1); line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('map-tab')">Interactive Map</button>
+    <button onclick="showSection('guide')">User Guide</button>
+</nav>
+
+<div id="home" class="content-section active">
+    <h1>Welcome to the FWA Dashboard</h1>
+    <div class="card">
+        <p><strong>Food Well Alliance (FWA)</strong> is a collaborative network that supports over 300 community gardens, urban farms, and orchards across metro Atlanta.</p>
+        <p>This project was developed to help Atlanta citizens find resources to build thriving, equitable communities through local food. Our mission is to connect you with the tools, land, and people needed to grow food where you live.</p>
+    </div>
+</div>
+
+<div id="map-tab" class="content-section">
+    <h1>Find a Garden or Tool Hub</h1>
+    <p>Use the map below to find FWA-supported resources near your zip code.</p>
+    <div id="map"></div>
+</div>
+
+<div id="guide" class="content-section">
+    <h1>The FWA Way: Resource Guide</h1>
+    <div class="card">
+        <h3>How to Rent Tools</h3>
+        <p>FWA partners with the Atlanta ToolBank. To access the Urban Agriculture Tool Lending Program, you must first complete a <strong>BCS Tractor Training</strong> session.</p>
+        
+        <h3>Requesting Compost</h3>
+        <p>Registered community gardens can request compost deliveries and mechanical assistance directly through the FWA Resource Center.</p>
+        
+        <h3>Starting a Garden</h3>
+        <p>The "FWA Way" focuses on community collaboration. Don't just plant seeds—organize your neighbors!</p>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // 1. Function to switch between tabs
+    function showSection(sectionId) {
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+        
+        // Fix for Leaflet: Refresh map size when tab is clicked
+        if(sectionId === 'map-tab') {
+            setTimeout(() => { map.invalidateSize(); }, 200);
+        }
+    }
+
+    // 2. Initialize the Map
+    var map = L.map('map').setView([33.7490, -84.3880], 11); // Centered on Atlanta
+
+    // 3. Add the Map "Skin" (Tiles)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 4. Example Marker (FWA Office area)
+    L.marker([33.7490, -84.3880]).addTo(map)
+        .bindPopup('Welcome to Atlanta!<br> Future FWA locations will appear here.')
+        .openPopup();
+</script>
+
+</body>
+</html>
