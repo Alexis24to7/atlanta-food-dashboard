@@ -3,113 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FWA Atlas</title>
+    <title>FWA Atlas | Food Well Alliance</title>
     
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
     
     <style>
-        :root { --fwa-green: #2e7d32; --sidebar-white: #ffffff; }
-        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        :root { --fwa-green: #2e7d32; --fwa-dark: #1b5e20; }
+        
+        html { scroll-behavior: smooth; } /* Makes the "jump" to map look like a smooth slide */
+        body { margin: 0; font-family: 'Inter', -apple-system, sans-serif; background: #f9fbf9; color: #333; }
 
-        /* 1. Sidebar Layout */
-        #sidebar { width: 350px; background: var(--sidebar-white); border-right: 1px solid #ddd; display: flex; flex-direction: column; z-index: 10; }
-        .sidebar-header { padding: 25px; border-bottom: 1px solid #eee; }
-        .logo { font-size: 1.5rem; font-weight: 800; color: var(--fwa-green); cursor: pointer; }
+        /* 1. Top Navigation Bar */
+        header {
+            position: fixed; top: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 50px; box-sizing: border-box; z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-weight: 800; color: var(--fwa-green); font-size: 1.4rem; text-decoration: none; }
+        
+        .nav-links a {
+            text-decoration: none; color: #555; font-weight: 600;
+            margin-left: 30px; transition: 0.3s; padding: 8px 16px; border-radius: 6px;
+        }
+        .nav-links a:hover { color: var(--fwa-green); background: #f0f7f0; }
 
-        /* 2. Tab Navigation Buttons */
-        .nav-tabs { display: flex; padding: 15px 25px; gap: 10px; border-bottom: 1px solid #eee; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: #f0f2f0; border-radius: 8px; cursor: pointer; font-weight: 600; color: #555; transition: 0.3s; }
-        .tab-btn.active { background: var(--fwa-green); color: white; box-shadow: 0 4px 10px rgba(46,125,50,0.2); }
+        /* 2. Section Styling */
+        section { min-height: 100vh; padding: 100px 10% 50px; box-sizing: border-box; }
 
-        /* 3. Section Content */
-        .tab-content { padding: 25px; flex-grow: 1; overflow-y: auto; display: none; }
-        .active-section { display: block; }
+        /* Home Section */
+        #home { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .hero-title { font-size: 4rem; color: var(--fwa-dark); margin: 0; }
+        .hero-subtitle { font-size: 1.5rem; color: #666; margin-bottom: 30px; }
+        
+        /* The "Scroll to Map" Link */
+        .map-trigger {
+            display: inline-block; padding: 15px 40px; background: var(--fwa-green);
+            color: white; text-decoration: none; border-radius: 50px;
+            font-weight: bold; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(46,125,50,0.2);
+            transition: 0.3s;
+        }
+        .map-trigger:hover { transform: translateY(-3px); background: var(--fwa-dark); }
 
-        /* 4. Map View */
-        #map { flex-grow: 1; height: 100%; }
+        /* Map Section */
+        #map-section { background: white; }
+        #map { height: 70vh; width: 100%; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
 
-        /* Layer Toggle Menu */
-        #menu { position: absolute; background: #fff; padding: 10px; border-radius: 8px; top: 10px; right: 10px; z-index: 1; border: 1px solid #ccc; font-weight: bold; }
+        /* Guide Section */
+        #guide { background: #f0f4f0; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-<div id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo">🌿 FWA ATLAS</div>
-    </div>
-    
-    <div class="nav-tabs">
-        <button class="tab-btn active" id="btn-home" onclick="showTab('home')">Home</button>
-        <button class="tab-btn" id="btn-map" onclick="showTab('map-info')">Map Info</button>
-        <button class="tab-btn" id="btn-guide" onclick="showTab('guide')">Guide</button>
-    </div>
+<header>
+    <a href="#home" class="logo">🌿 FWA ATLAS</a>
+    <nav class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#map-section">Map</a>
+        <a href="#guide">Guide</a>
+    </nav>
+</header>
 
-    <div id="home" class="tab-content active-section">
-        <h2>Welcome</h2>
-        <p>This dashboard serves as the central hub for the Food Well Alliance garden network across Georgia.</p>
-    </div>
+<section id="home">
+    <h1 class="hero-title">Locally Grown.</h1>
+    <p class="hero-subtitle">Discover community gardens and urban farming resources across Georgia.</p>
+    <p style="max-width: 600px; line-height: 1.6; margin-bottom: 40px;">
+        Food Well Alliance provides the tools, compost, and mechanical support needed to grow a thriving local food system. 
+        Ready to find your nearest garden?
+    </p>
+    <a href="#map-section" class="map-trigger">Find a Garden on the Map ↓</a>
+</section>
 
-    <div id="map-info" class="tab-content">
-        <h2>Nearby Gardens</h2>
-        <div id="location-list">
-            <p style="color:#666">Click a point on the map to see specific garden details here.</p>
+<section id="map-section">
+    <h2 style="font-size: 2.5rem; color: var(--fwa-dark);">Interactive Atlas</h2>
+    <p>Search by zip code or browse the pins below to find FWA-supported sites.</p>
+    <div id="map"></div>
+</section>
+
+<section id="guide">
+    <h2 style="font-size: 2.5rem; color: var(--fwa-dark);">FWA Resource Guide</h2>
+    <div class="card-grid">
+        <div class="card">
+            <h3>🛠 Tool Lending</h3>
+            <p>Access high-quality tools like BCS Tractors via the Atlanta ToolBank. Completion of training is required.</p>
+        </div>
+        <div class="card">
+            <h3>🌱 Compost Delivery</h3>
+            <p>We deliver locally sourced compost to community gardens to ensure soil health and crop productivity.</p>
+        </div>
+        <div class="card">
+            <h3>🤝 Volunteer</h3>
+            <p>Join a network of over 3,000 volunteers helping to maintain the local food infrastructure.</p>
         </div>
     </div>
-
-    <div id="guide" class="tab-content">
-        <h2>Resource Guide</h2>
-        <p><b>Tools:</b> Rent from Atlanta ToolBank.</p>
-        <p><b>Compost:</b> Delivery available statewide.</p>
-    </div>
-</div>
-
-<div id="map"></div>
+</section>
 
 <script>
-    // TO MAKE THIS WORK: Replace with your token from your Mapbox account
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGlzMjR0bzciLCJhIjoiY21vMHk0YXBwMGQ1MTJzb2dyNHFhbGgwMSJ9.lJlOg18FfjTPvBdSUXd5OA'; // Paste your actual token here
+    // YOUR MAPBOX TOKEN
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGlzMjR0bzciLCJhIjoiY21vMHk0YXBwMGQ1MTJzb2dyNHFhbGgwMSJ9.lJlOg18FfjTPvBdSUXd5OA';
 
     const map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/light-v11', // Clean professional style
-        center: [-83.5, 32.7], // Centers perfectly on GEORGIA
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [-83.5, 32.7], // Focused on Georgia
         zoom: 6.5,
-        pitch: 45 // 3D Tilt
+        pitch: 45
     });
 
-    // 1. Tab Switching Function
-    function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-section'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active-section');
-        document.getElementById('btn-' + (tabId === 'map-info' ? 'map' : tabId)).classList.add('active');
-    }
+    // Add 3 FWA markers immediately
+    const points = [
+        { name: "FWA HQ", c: [-84.4225, 33.7846] },
+        { name: "Truly Living Well", c: [-84.4042, 33.7508] },
+        { name: "Atlanta ToolBank", c: [-84.3725, 33.7431] }
+    ];
 
-    // 2. Add Points (Gardens)
-    map.on('load', () => {
-        // Example Garden Point
+    points.forEach(p => {
         new mapboxgl.Marker({ color: '#2e7d32' })
-            .setLngLat([-84.4225, 33.7846])
-            .setPopup(new mapboxgl.Popup().setHTML("<b>FWA Headquarters</b><br>Atlanta, GA"))
+            .setLngLat(p.c)
+            .setPopup(new mapboxgl.Popup().setHTML(`<b>${p.name}</b>`))
             .addTo(map);
-
-        // 3D Buildings Layer
-        map.addLayer({
-            'id': '3d-buildings',
-            'source': 'composite',
-            'source-layer': 'building',
-            'filter': ['==', 'extrude', 'true'],
-            'type': 'fill-extrusion',
-            'minzoom': 15,
-            'paint': {
-                'fill-extrusion-color': '#aaa',
-                'fill-extrusion-height': ['get', 'height'],
-                'fill-extrusion-opacity': 0.6
-            }
-        });
     });
 </script>
 
