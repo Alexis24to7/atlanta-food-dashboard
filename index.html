@@ -3,148 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FWA Dashboard</title>
+    <title>FWA Atlas</title>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
     
     <style>
-        :root { --fwa-green: #2e7d32; --fwa-dark: #1b5e20; --white: #ffffff; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; overflow: hidden; }
+        :root { --fwa-green: #2e7d32; --sidebar-white: #ffffff; }
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
 
-        /* Layout Container */
-        #app-container { display: flex; height: 100vh; width: 100vw; }
+        /* 1. Sidebar Layout */
+        #sidebar { width: 350px; background: var(--sidebar-white); border-right: 1px solid #ddd; display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-header { padding: 25px; border-bottom: 1px solid #eee; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--fwa-green); cursor: pointer; }
 
-        /* Sidebar (Concept3D Style) */
-        #sidebar {
-            width: 350px; background: var(--white); z-index: 2000;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column;
-        }
+        /* 2. Tab Navigation Buttons */
+        .nav-tabs { display: flex; padding: 15px 25px; gap: 10px; border-bottom: 1px solid #eee; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: #f0f2f0; border-radius: 8px; cursor: pointer; font-weight: 600; color: #555; transition: 0.3s; }
+        .tab-btn.active { background: var(--fwa-green); color: white; box-shadow: 0 4px 10px rgba(46,125,50,0.2); }
 
-        .sidebar-header { padding: 20px; border-bottom: 1px solid #eee; }
-        .logo { font-weight: 800; color: var(--fwa-green); font-size: 1.2rem; cursor: pointer; display: block; margin-bottom: 15px; }
-        
-        /* Search Bar */
-        .search-container { position: relative; margin-bottom: 10px; }
-        #zip-search {
-            width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ddd;
-            box-sizing: border-box; font-size: 0.9rem;
-        }
-
-        /* Nav Buttons */
-        .nav-tabs { display: flex; gap: 5px; padding: 0 20px 15px; }
-        .tab-btn {
-            flex: 1; padding: 10px; border: none; background: #f0f2f0;
-            border-radius: 6px; cursor: pointer; font-weight: 600; color: #555;
-        }
-        .tab-btn.active { background: var(--fwa-green); color: white; }
-
-        /* Map Area */
-        #map-wrapper { flex-grow: 1; position: relative; background: #e5e3df; }
-        #map { height: 100%; width: 100%; }
-
-        /* Live Location Button */
-        .locate-btn {
-            position: absolute; bottom: 30px; right: 20px; z-index: 1000;
-            background: white; border: none; width: 45px; height: 45px;
-            border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; transition: 0.2s;
-        }
-        .locate-btn:hover { transform: scale(1.1); }
-
-        /* Content Sections */
-        .side-content { padding: 20px; overflow-y: auto; flex-grow: 1; display: none; }
+        /* 3. Section Content */
+        .tab-content { padding: 25px; flex-grow: 1; overflow-y: auto; display: none; }
         .active-section { display: block; }
+
+        /* 4. Map View */
+        #map { flex-grow: 1; height: 100%; }
+
+        /* Layer Toggle Menu */
+        #menu { position: absolute; background: #fff; padding: 10px; border-radius: 8px; top: 10px; right: 10px; z-index: 1; border: 1px solid #ccc; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="app-container">
-    <div id="sidebar">
-        <div class="sidebar-header">
-            <span class="logo" onclick="location.reload()">🌿 FWA ATLAS</span>
-            <div class="search-container">
-                <input type="text" id="zip-search" placeholder="Enter Zip Code (e.g. 30318)" onkeypress="handleSearch(event)">
-            </div>
-        </div>
-        
-        <div class="nav-tabs">
-            <button class="tab-btn active" id="btn-map" onclick="showSection('map-tab')">Map</button>
-            <button class="tab-btn" id="btn-guide" onclick="showSection('guide')">Guide</button>
-        </div>
+<div id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">🌿 FWA ATLAS</div>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="btn-home" onclick="showTab('home')">Home</button>
+        <button class="tab-btn" id="btn-map" onclick="showTab('map-info')">Map Info</button>
+        <button class="tab-btn" id="btn-guide" onclick="showTab('guide')">Guide</button>
+    </div>
 
-        <div id="map-tab" class="side-content active-section">
-            <h3>Resources Near You</h3>
-            <p style="color: #666; font-size: 0.85rem;">Type your zip code above to find FWA hubs.</p>
-            <div id="location-details"></div>
-        </div>
+    <div id="home" class="tab-content active-section">
+        <h2>Welcome</h2>
+        <p>This dashboard serves as the central hub for the Food Well Alliance garden network across Georgia.</p>
+    </div>
 
-        <div id="guide" class="side-content">
-            <h3>FWA Resource Guide</h3>
-            <p><b>How to Rent:</b> Visit the Atlanta ToolBank with your FWA membership.</p>
-            <p><b>Compost:</b> Delivery available for registered gardens.</p>
+    <div id="map-info" class="tab-content">
+        <h2>Nearby Gardens</h2>
+        <div id="location-list">
+            <p style="color:#666">Click a point on the map to see specific garden details here.</p>
         </div>
     </div>
 
-    <div id="map-wrapper">
-        <div id="map"></div>
-        <button class="locate-btn" onclick="findMe()" title="Find my location">🎯</button>
+    <div id="guide" class="tab-content">
+        <h2>Resource Guide</h2>
+        <p><b>Tools:</b> Rent from Atlanta ToolBank.</p>
+        <p><b>Compost:</b> Delivery available statewide.</p>
     </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div id="map"></div>
 
 <script>
-    // Initialize Map
-    var map = L.map('map', { zoomControl: false }).setView([33.7490, -84.3880], 12);
-    L.control.zoom({ position: 'topright' }).addTo(map);
+    // TO MAKE THIS WORK: Replace with your token from your Mapbox account
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGlzMjR0bzciLCJhIjoiY21vMHk0YXBwMGQ1MTJzb2dyNHFhbGgwMSJ9.lJlOg18FfjTPvBdSUXd5OA'; // Paste your actual token here
 
-    // High-Detail 3D-ish Tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
-
-    // FWA Data Points
-    var locations = [
-        { name: "FWA HQ", lat: 33.7846, lng: -84.4225, info: "Headquarters & Office" },
-        { name: "Tool Lending Hub", lat: 33.7431, lng: -84.3725, info: "ToolBank - Rent tractors here!" }
-    ];
-
-    locations.forEach(loc => {
-        L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.info}`);
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11', // Clean professional style
+        center: [-83.5, 32.7], // Centers perfectly on GEORGIA
+        zoom: 6.5,
+        pitch: 45 // 3D Tilt
     });
 
-    // 1. Live Location Function
-    function findMe() {
-        map.locate({setView: true, maxZoom: 16});
-    }
-
-    map.on('locationfound', function(e) {
-        L.circle(e.latlng, e.accuracy).addTo(map);
-        L.marker(e.latlng).addTo(map).bindPopup("You are here").openPopup();
-    });
-
-    // 2. Zip Code Search (Simple Version)
-    function handleSearch(e) {
-        if (e.key === 'Enter') {
-            var zip = document.getElementById('zip-search').value;
-            // For now, we center on Atlanta's general area for specific zips
-            // In a real app, we'd use a Geocoder API here.
-            alert("Searching for resources in " + zip + "...");
-            map.flyTo([33.7490, -84.3880], 13);
-        }
-    }
-
-    // 3. Sidebar Tab Switching
-    function showSection(sectionId) {
-        document.querySelectorAll('.side-content').forEach(s => s.classList.remove('active-section'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    // 1. Tab Switching Function
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-section'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         
-        document.getElementById(sectionId).classList.add('active-section');
-        const btnId = sectionId === 'map-tab' ? 'btn-map' : 'btn-guide';
-        document.getElementById(btnId).classList.add('active');
+        document.getElementById(tabId).classList.add('active-section');
+        document.getElementById('btn-' + (tabId === 'map-info' ? 'map' : tabId)).classList.add('active');
     }
+
+    // 2. Add Points (Gardens)
+    map.on('load', () => {
+        // Example Garden Point
+        new mapboxgl.Marker({ color: '#2e7d32' })
+            .setLngLat([-84.4225, 33.7846])
+            .setPopup(new mapboxgl.Popup().setHTML("<b>FWA Headquarters</b><br>Atlanta, GA"))
+            .addTo(map);
+
+        // 3D Buildings Layer
+        map.addLayer({
+            'id': '3d-buildings',
+            'source': 'composite',
+            'source-layer': 'building',
+            'filter': ['==', 'extrude', 'true'],
+            'type': 'fill-extrusion',
+            'minzoom': 15,
+            'paint': {
+                'fill-extrusion-color': '#aaa',
+                'fill-extrusion-height': ['get', 'height'],
+                'fill-extrusion-opacity': 0.6
+            }
+        });
+    });
 </script>
 
 </body>
