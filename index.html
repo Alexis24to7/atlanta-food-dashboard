@@ -3,131 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FWA Atlas | Food Well Alliance</title>
+    <title>Food Well Alliance | Clone</title>
     
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
     <style>
-        :root { --fwa-green: #2e7d32; --fwa-dark: #1b5e20; }
-        
-        html { scroll-behavior: smooth; } /* Makes the "jump" to map look like a smooth slide */
-        body { margin: 0; font-family: 'Inter', -apple-system, sans-serif; background: #f9fbf9; color: #333; }
-
-        /* 1. Top Navigation Bar */
-        header {
-            position: fixed; top: 0; width: 100%; height: 70px;
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 50px; box-sizing: border-box; z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        :root { 
+            --fwa-orange: #f26639; 
+            --fwa-brown: #4d382d; 
+            --fwa-teal: #429ca6;
+            --bg-light: #ffffff;
         }
-        .logo { font-weight: 800; color: var(--fwa-green); font-size: 1.4rem; text-decoration: none; }
         
-        .nav-links a {
-            text-decoration: none; color: #555; font-weight: 600;
-            margin-left: 30px; transition: 0.3s; padding: 8px 16px; border-radius: 6px;
-        }
-        .nav-links a:hover { color: var(--fwa-green); background: #f0f7f0; }
+        html { scroll-behavior: smooth; }
+        body { margin: 0; font-family: 'Inter', sans-serif; color: #333; line-height: 1.6; }
+        h1, h2, h3 { font-family: 'Montserrat', sans-serif; color: var(--fwa-brown); }
 
-        /* 2. Section Styling */
-        section { min-height: 100vh; padding: 100px 10% 50px; box-sizing: border-box; }
-
-        /* Home Section */
-        #home { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .hero-title { font-size: 4rem; color: var(--fwa-dark); margin: 0; }
-        .hero-subtitle { font-size: 1.5rem; color: #666; margin-bottom: 30px; }
+        /* Top Bar & Header */
+        .top-bar { background: #fdfaf6; text-align: right; padding: 5px 10%; font-size: 0.8rem; font-weight: bold; border-bottom: 1px solid #eee; }
+        .top-bar a { color: var(--fwa-brown); text-decoration: none; margin-left: 15px; }
         
-        /* The "Scroll to Map" Link */
-        .map-trigger {
-            display: inline-block; padding: 15px 40px; background: var(--fwa-green);
-            color: white; text-decoration: none; border-radius: 50px;
-            font-weight: bold; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(46,125,50,0.2);
-            transition: 0.3s;
-        }
-        .map-trigger:hover { transform: translateY(-3px); background: var(--fwa-dark); }
+        header { position: sticky; top: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 15px 5%; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .logo { position: absolute; left: 5%; top: 0; background: var(--fwa-orange); padding: 15px; text-align: center; color: white; font-weight: 800; text-decoration: none; font-family: 'Montserrat'; letter-spacing: 2px; }
+        .logo img { width: 50px; display: block; margin: 0 auto 5px; }
+        
+        .nav-links a { color: var(--fwa-teal); text-decoration: none; font-weight: 700; text-transform: uppercase; margin: 0 20px; font-size: 0.9rem; letter-spacing: 1px; }
+        .nav-links a:hover { color: var(--fwa-orange); }
 
-        /* Map Section */
-        #map-section { background: white; }
-        #map { height: 70vh; width: 100%; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        /* Sections */
+        section { padding: 80px 10%; }
+        
+        /* Intro / Hero */
+        #intro { padding-top: 40px; text-align: center; }
+        .hero-banner { width: 100%; height: 400px; background: url('https://www.foodwellalliance.org/hubfs/FWA_SoilFestival_2023-145.jpg') center/cover; position: relative; }
+        .hero-label { position: absolute; bottom: -20px; left: 10%; background: var(--fwa-brown); color: white; padding: 10px 30px; font-size: 1.5rem; font-family: 'Montserrat'; }
+        .intro-text { max-width: 800px; margin: 60px auto 0; font-size: 1.2rem; font-weight: 600; color: var(--fwa-brown); }
 
-        /* Guide Section */
-        #guide { background: #f0f4f0; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        /* Map */
+        #map-section { background: #f9f9f9; text-align: center; }
+        #map-container { height: 600px; width: 100%; border: 2px solid #ddd; position: relative; text-align: left; }
+        #map { height: 100%; width: 100%; }
+        
+        /* Map Controls overlay */
+        .map-controls { position: absolute; top: 10px; left: 10px; background: white; padding: 15px; z-index: 1; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .map-controls button { display: block; width: 100%; margin-bottom: 5px; padding: 8px; background: var(--fwa-teal); color: white; border: none; cursor: pointer; font-weight: bold; }
+        .map-controls button:hover { background: var(--fwa-orange); }
+
+        /* History */
+        #history { text-align: center; }
+        .history-img { width: 100%; max-width: 800px; border-radius: 8px; margin: 20px 0; }
+        .donate-btn { display: inline-block; background: var(--fwa-orange); color: white; padding: 15px 30px; text-decoration: none; font-weight: bold; letter-spacing: 1px; margin-top: 20px; }
+
+        /* Guide / Resources Grid */
+        #guide { text-align: center; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 30px; }
+        .resource-card img { width: 100%; height: 150px; object-fit: cover; }
+        .resource-card h4 { margin-top: 10px; color: var(--fwa-brown); border-bottom: 2px solid var(--fwa-brown); display: inline-block; padding-bottom: 5px; }
+
+        /* Footer */
+        footer { background: var(--fwa-brown); color: white; padding: 60px 10%; text-align: center; font-size: 0.85rem; }
+        .newsletter-form { max-width: 500px; margin: 0 auto 40px; background: white; padding: 30px; border-radius: 4px; text-align: left; color: #333; }
+        .newsletter-form input[type="text"], .newsletter-form input[type="email"] { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; box-sizing: border-box; background: #fdfaf6; }
+        .newsletter-form button { background: #000; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+        .footer-logos { display: flex; justify-content: center; gap: 20px; margin-top: 40px; }
+        .footer-logos img { height: 60px; }
     </style>
 </head>
 <body>
 
-<header>
-    <a href="#home" class="logo">🌿 FWA ATLAS</a>
-    <nav class="nav-links">
-        <a href="#home">Home</a>
-        <a href="#map-section">Map</a>
-        <a href="#guide">Guide</a>
-    </nav>
-</header>
-
-<section id="home">
-    <h1 class="hero-title">Locally Grown.</h1>
-    <p class="hero-subtitle">Discover community gardens and urban farming resources across Georgia.</p>
-    <p style="max-width: 600px; line-height: 1.6; margin-bottom: 40px;">
-        Food Well Alliance provides the tools, compost, and mechanical support needed to grow a thriving local food system. 
-        Ready to find your nearest garden?
-    </p>
-    <a href="#map-section" class="map-trigger">Find a Garden on the Map ↓</a>
-</section>
-
-<section id="map-section">
-    <h2 style="font-size: 2.5rem; color: var(--fwa-dark);">Interactive Atlas</h2>
-    <p>Search by zip code or browse the pins below to find FWA-supported sites.</p>
-    <div id="map"></div>
-</section>
-
-<section id="guide">
-    <h2 style="font-size: 2.5rem; color: var(--fwa-dark);">FWA Resource Guide</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3>🛠 Tool Lending</h3>
-            <p>Access high-quality tools like BCS Tractors via the Atlanta ToolBank. Completion of training is required.</p>
-        </div>
-        <div class="card">
-            <h3>🌱 Compost Delivery</h3>
-            <p>We deliver locally sourced compost to community gardens to ensure soil health and crop productivity.</p>
-        </div>
-        <div class="card">
-            <h3>🤝 Volunteer</h3>
-            <p>Join a network of over 3,000 volunteers helping to maintain the local food infrastructure.</p>
-        </div>
+    <div class="top-bar">
+        <a href="#">DONATE</a>
+        <a href="#">VOLUNTEER</a>
     </div>
-</section>
 
-<script>
-    // YOUR MAPBOX TOKEN
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGlzMjR0bzciLCJhIjoiY21vMHk0YXBwMGQ1MTJzb2dyNHFhbGgwMSJ9.lJlOg18FfjTPvBdSUXd5OA';
+    <header>
+        <a href="https://www.foodwellalliance.org" class="logo">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="4"><path d="M50 10v40m-30-20c0 20 60 20 60 0M30 60c0 20 40 20 40 0" /></svg><br>
+            FOOD<br>WELL<br><span style="font-size: 0.6rem; font-weight: 400;">ALLIANCE</span>
+        </a>
+        <nav class="nav-links">
+            <a href="#intro">Intro</a>
+            <a href="#map-section">Map</a>
+            <a href="#history">History</a>
+            <a href="#guide">Guide</a>
+        </nav>
+    </header>
 
-    const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [-83.5, 32.7], // Focused on Georgia
-        zoom: 6.5,
-        pitch: 45
-    });
+    <section id="intro">
+        <div class="hero-banner">
+            <div class="hero-label">Let's Grow Together</div>
+        </div>
+        <p class="intro-text">
+            Food Well Alliance is a collaborative network of local leaders working together to build equitable and thriving community gardens, urban farms, and orchards across metro Atlanta.
+        </p>
+    </section>
 
-    // Add 3 FWA markers immediately
-    const points = [
-        { name: "FWA HQ", c: [-84.4225, 33.7846] },
-        { name: "Truly Living Well", c: [-84.4042, 33.7508] },
-        { name: "Atlanta ToolBank", c: [-84.3725, 33.7431] }
-    ];
+    <section id="map-section">
+        <h2>Grow With Us: Interactive Map</h2>
+        <div id="map-container">
+            <div class="map-controls">
+                <b>Map Layers</b>
+                <button onclick="toggleLayer('gardens')">Active Gardens</button>
+                <button onclick="toggleLayer('regions')">Regions in Need</button>
+                <hr>
+                <b>Add Custom Point</b><br>
+                <input type="text" id="lat" placeholder="Latitude (e.g. 33.7)" style="width:100%; margin-top:5px;">
+                <input type="text" id="lng" placeholder="Longitude (e.g. -84.3)" style="width:100%; margin:5px 0;">
+                <button onclick="addPoint()" style="background: var(--fwa-orange);">Add Point</button>
+            </div>
+            <div id="map"></div>
+        </div>
+    </section>
 
-    points.forEach(p => {
-        new mapboxgl.Marker({ color: '#2e7d32' })
-            .setLngLat(p.c)
-            .setPopup(new mapboxgl.Popup().setHTML(`<b>${p.name}</b>`))
-            .addTo(map);
-    });
-</script>
+    <section id="history">
+        <h2>Soil Festival & Our Legacy</h2>
+        <p>Together, we can realize our vision of an Atlanta that is locally grown and community connected.</p>
+        <div style="width:100%; max-width:800px; height:300px; background:#ddd; margin:0 auto; display:flex; align-items:center; justify-content:center;">[Soil Festival Image]</div>
+        <br>
+        <a href="#" class="donate-btn">BECOME A MONTHLY DONOR</a>
+    </section>
 
+    <section id="guide">
+        <h2>Resources for Growing Healthier Communities</h2>
+        <div class="grid-4">
+            <div class="resource-card">
+                <div style="height:150px; background:#ccc;"></div>
+                <h4>Farm Resources</h4>
+            </div>
+            <div class="resource-card">
+                <div style="height:150px; background:#ccc;"></div>
+                <h4>Garden Resources</h4>
+            </div>
+            <div class="resource-card">
+                <div style="height:150px; background:#ccc;"></div>
+                <h4>Grow Your Own Food</h4>
+            </div>
+            <div class="resource-card">
+                <div style="height:150px; background:#ccc;"></div>
+                <h4>Donate Produce</h4>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="newsletter-form">
+            <h3 style="text-align:center; margin-top:0;">Subscribe to our Newsletter</h3>
+            <label>Email Address *</label>
+            <input type="email" required>
+            <label>First Name *</label>
+            <input type="text" required>
+            <label>Last Name *</label>
+            <input type="text" required>
+            <button>Subscribe</button>
+        </div>
+
+        <p>The creation of Food Well Alliance was made possible through funding from the founding benefactor, the James M. Cox Foundation.</p>
+        <p>Food Well Alliance is a 501(c)(3) nonprofit. Tax ID: 47-4363666</p>
+        
+        <div class="footer-logos">
+            <div style="width:80px; height:80px; background:white; color:black; display:flex; align-items:center; justify-content:center; font-weight:bold; border-radius:4px;">Charity<br>Navigator</div>
+            <div style="width:80px; height:80px; background:white; color:black; display:flex; align-items:center; justify-content:center; font-weight:bold; border-radius:4px;">Candid.</div>
+        </div>
+    </footer>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGlzMjR0bzciLCJhIjoiY21vbzIyc3J3MDB2ZzJycHY3N3p6bm9iZyJ9.R-4k3X0U1W8y8W8W8W8W8W';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v11',
+            center: [-84.3880, 33.7490], // Atlanta
+            zoom: 9
+        });
+
+        const activeGardens = [
+            [-84.4225, 33.7846], [-84.4178, 33.7684], [-84.3725, 33.7431]
+        ];
+
+        let gardenMarkers = [];
+
+        map.on('load', () => {
+            // Plot initial gardens
+            activeGardens.forEach(coord => {
+                const marker = new mapboxgl.Marker({ color: '#f26639' }).setLngLat(coord).addTo(map);
+                gardenMarkers.push(marker);
+            });
+
+            // Add Regions Polygon (GeoJSON)
+            map.addSource('regions', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Polygon',
+                        'coordinates': [[
+                            [-84.5, 33.8], [-84.3, 33.8], [-84.3, 33.6], [-84.5, 33.6], [-84.5, 33.8]
+                        ]]
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'regions-layer',
+                'type': 'fill',
+                'source': 'regions',
+                'layout': { 'visibility': 'visible' },
+                'paint': {
+                    'fill-color': '#429ca6',
+                    'fill-opacity': 0.4
+                }
+            });
+        });
+
+        // Layer Toggle Logic
+        function toggleLayer(layer) {
+            if (layer === 'gardens') {
+                const currentOpacity = gardenMarkers[0].getElement().style.opacity;
+                const newOpacity = currentOpacity === '0' ? '1' : '0';
+                gardenMarkers.forEach(m => m.getElement().style.opacity = newOpacity);
+            } else if (layer === 'regions') {
+                const visibility = map.getLayoutProperty('regions-layer', 'visibility');
+                map.setLayoutProperty('regions-layer', 'visibility', visibility === 'visible' ? 'none' : 'visible');
+            }
+        }
+
+        // Add Custom Point Logic
+        function addPoint() {
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lng = parseFloat(document.getElementById('lng').value);
+            
+            if (isNaN(lat) || isNaN(lng)) {
+                alert("Please enter valid numeric coordinates.");
+                return;
+            }
+            
+            const newMarker = new mapboxgl.Marker({ color: '#4d382d' }) // Brown for user-added
+                .setLngLat([lng, lat])
+                .setPopup(new mapboxgl.Popup().setText("User Added Need"))
+                .addTo(map);
+                
+            gardenMarkers.push(newMarker);
+            map.flyTo({ center: [lng, lat], zoom: 12 });
+        }
+    </script>
 </body>
 </html>
